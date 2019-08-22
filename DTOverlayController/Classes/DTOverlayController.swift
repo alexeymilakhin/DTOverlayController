@@ -40,6 +40,7 @@ open class DTOverlayController: UIViewController, UIViewControllerTransitioningD
     /// Height of `viewController`'s view inside DTOverlayController.
     public var overlayHeight: DTLayOverHeight {
         didSet {
+            updateHeight()
             viewIfLoaded?.setNeedsLayout()
             viewIfLoaded?.layoutIfNeeded()
         }
@@ -104,7 +105,7 @@ open class DTOverlayController: UIViewController, UIViewControllerTransitioningD
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.addSubview(handle)
         updateCornerRadius()
         viewController.view.layer.masksToBounds = true
@@ -136,6 +137,25 @@ open class DTOverlayController: UIViewController, UIViewControllerTransitioningD
             // Fallback on earlier versions
             addCornerRadiusMask()
         }
+    }
+    
+    private func updateHeight() {
+        let height: CGFloat
+        let parentSize = UIScreen.main.bounds.size
+        
+        switch overlayHeight {
+        case let .dynamic(ratio):
+            height = ratio * parentSize.height
+        case let .static(fixedHeight):
+            height = fixedHeight
+        case let .inset(topInset):
+            height = parentSize.height - topInset
+        }
+        
+        view.frame.size = CGSize(width: parentSize.width, height: height)
+        
+        let presentationController = self.presentationController as? DTOverlayPresentationController
+        presentationController?.overlayHeight = overlayHeight
     }
     
     private func addCornerRadiusMask() {
@@ -170,7 +190,7 @@ open class DTOverlayController: UIViewController, UIViewControllerTransitioningD
             observeScrollViewUpdate(with: child)
         }
     }
-
+    
     // MARK: - UIViewControllerTransitioningDelegate
     open func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return transitioningAnimator()

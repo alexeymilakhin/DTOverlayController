@@ -38,7 +38,12 @@ open class DTOverlayController: UIViewController, UIViewControllerTransitioningD
     }
     
     /// Height of `viewController`'s view inside DTOverlayController.
-    public var overlayHeight: DTLayOverHeight
+    public var overlayHeight: DTLayOverHeight {
+        didSet {
+            viewIfLoaded?.setNeedsLayout()
+            viewIfLoaded?.layoutIfNeeded()
+        }
+    }
     
     /// Threshold progress for lay over view controller to be totally dismissed.
     public var dismissableProgress: CGFloat {
